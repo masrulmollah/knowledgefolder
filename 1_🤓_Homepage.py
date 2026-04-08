@@ -3,7 +3,6 @@ import os
 import importlib.util
 
 # --- 1. SET PAGE CONFIG ---
-# This sets the browser tab title and favicon
 st.set_page_config(
     page_title="Knowledge Folder", 
     page_icon="📁", 
@@ -12,7 +11,6 @@ st.set_page_config(
 
 def main():
     # --- 2. STATIC CUSTOM HEADER ---
-    # This remains visible at the top of every page
     st.markdown("""
         <style>
         .main-header {
@@ -22,7 +20,7 @@ def main():
             background-color: #FBFCFC;
             padding: 8px 15px;
             border-radius: 8px;
-            border-left: 5px solid #001A70; /* Unilever Blue Accent */
+            border-left: 5px solid #001A70; 
             margin-bottom: 25px;
             box-shadow: 0px 2px 4px rgba(0,0,0,0.05);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -36,30 +34,42 @@ def main():
     # --- 3. DIRECTORY SCANNING ---
     root_dir = os.getcwd() 
     # Files/folders to hide from the navigation menu
-    ignore_list = ['__pycache__', '.git', '.streamlit', 'venv', '1_🤓_Homepage.py', 'main.py']
+    ignore_list = [
+        '__pycache__', '.git', '.streamlit', 'venv', 
+        '1_🤓_Homepage.py', 'main.py', 'requirements.txt', 'credentials.json'
+    ]
     
-    # Identify Main Block folders
-    main_blocks = sorted([d for d in os.listdir(root_dir) 
-                         if os.path.isdir(os.path.join(root_dir, d)) 
-                         and d not in ignore_list])
+    # Identify Main Block folders (e.g., 01_VAT, 02_Talent_Pool)
+    items = sorted(os.listdir(root_dir))
+    main_blocks = [
+        f for f in items 
+        if os.path.isdir(os.path.join(root_dir, f)) and f not in ignore_list
+    ]
 
     if not main_blocks:
-        st.error("No Category folders found! Please create folders like 'Accounting' or 'Machine_Learning'.")
+        st.warning("No category folders found in the root directory.")
         return
 
+    # Clean the folder names for the top menu (remove numbers and emojis for the label)
+    tab_labels = []
+    for folder in main_blocks:
+        # Removes numbers and underscores, e.g., "01_⚖️_VAT" -> "⚖️ VAT"
+        clean_name = folder.split('_', 1)[-1].replace('_', ' ') if '_' in folder else folder
+        tab_labels.append(clean_name)
+
     # --- 4. TOP NAVIGATION (MAIN BLOCKS) ---
-    # Clean folder names for display (e.g., '01_Accounting' becomes 'Accounting')
-    tab_labels = [d.split('_', 1)[-1].replace('_', ' ') if '_' in d else d for d in main_blocks]
-    
     selected_tab_label = st.segmented_control(
-        label="Category Selection", 
-        options=tab_labels, 
-        selection_mode="single",
+        "Select Category",
+        options=tab_labels,
         default=tab_labels[0],
-        label_visibility="collapsed" 
+        selection_mode="single" 
     )
 
-    # Map selected label back to the folder path
+    if not selected_tab_label:
+        st.info("Please select a category from the top menu.")
+        return
+
+    # Map selected label back to the actual folder path
     selected_index = tab_labels.index(selected_tab_label)
     selected_block = main_blocks[selected_index]
 
@@ -80,20 +90,31 @@ def main():
             key="topic_selector"
         )
 
-        # --- 6. CONTENT RENDERING ---
+        # --- 6. CONTENT RENDERING WITH ERROR HANDLING ---
         if selected_subpage:
-            # Add a small buffer before content starts
             st.write("") 
-            
             file_to_load = os.path.join(block_path, page_names[selected_subpage])
             
-            # This logic dynamically executes the code inside your subpage file
-            spec = importlib.util.spec_from_file_location("module.name", file_to_load)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
+            try:
+                # Dynamically execute the subpage
+                spec = importlib.util.spec_from_file_location("module.name", file_to_load)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+            
+            except ModuleNotFoundError as e:
+                st.error(f"### ⚠️ Missing Library")
+                st.info(f"The page you are trying to view requires a library that isn't installed: **{e.name}**")
+                st.markdown("""
+                **How to fix:**
+                1. Add `{}` to your `requirements.txt` file in GitHub.
+                2. Wait a moment for Streamlit to reboot.
+                """.format(e.name))
+            
+            except Exception as e:
+                st.error(f"### ❌ Page Error")
+                st.exception(e)
     else:
-        st.info(f"The folder '{selected_block}' is currently empty. Add .py files to start.")
+        st.info("This category folder is currently empty.")
 
-# --- 7. RUN THE APP ---
 if __name__ == "__main__":
     main()

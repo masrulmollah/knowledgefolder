@@ -1,0 +1,4 @@
+PyPDF2
+google-api-python-client
+google-auth
+pandas
