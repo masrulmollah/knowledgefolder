@@ -33,13 +33,11 @@ def main():
 
     # --- 3. DIRECTORY SCANNING ---
     root_dir = os.getcwd() 
-    # Files/folders to hide from the navigation menu
     ignore_list = [
         '__pycache__', '.git', '.streamlit', 'venv', 
         '1_🤓_Homepage.py', 'main.py', 'requirements.txt', 'credentials.json'
     ]
     
-    # Identify Main Block folders (e.g., 01_VAT, 02_Talent_Pool)
     items = sorted(os.listdir(root_dir))
     main_blocks = [
         f for f in items 
@@ -47,17 +45,12 @@ def main():
     ]
 
     if not main_blocks:
-        st.warning("No category folders found in the root directory.")
+        st.warning("No category folders found.")
         return
 
-    # Clean the folder names for the top menu (remove numbers and emojis for the label)
-    tab_labels = []
-    for folder in main_blocks:
-        # Removes numbers and underscores, e.g., "01_⚖️_VAT" -> "⚖️ VAT"
-        clean_name = folder.split('_', 1)[-1].replace('_', ' ') if '_' in folder else folder
-        tab_labels.append(clean_name)
+    tab_labels = [f.split('_', 1)[-1].replace('_', ' ') if '_' in f else f for f in main_blocks]
 
-    # --- 4. TOP NAVIGATION (MAIN BLOCKS) ---
+    # --- 4. TOP NAVIGATION ---
     selected_tab_label = st.segmented_control(
         "Select Category",
         options=tab_labels,
@@ -66,55 +59,40 @@ def main():
     )
 
     if not selected_tab_label:
-        st.info("Please select a category from the top menu.")
         return
 
-    # Map selected label back to the actual folder path
     selected_index = tab_labels.index(selected_tab_label)
     selected_block = main_blocks[selected_index]
 
-    # --- 5. SIDEBAR NAVIGATION (SUBPAGES) ---
+    # --- 5. SIDEBAR NAVIGATION ---
     block_path = os.path.join(root_dir, selected_block)
     subpages = sorted([f for f in os.listdir(block_path) if f.endswith('.py')])
 
     if subpages:
-        # Clean subpage names for the sidebar dropdown
-        page_names = {}
-        for f in subpages:
-            clean_n = f.split('_', 1)[-1].replace('.py', '').replace('_', ' ') if '_' in f else f.replace('.py', '')
-            page_names[clean_n] = f
+        page_names = { (f.split('_', 1)[-1].replace('.py', '').replace('_', ' ') if '_' in f else f.replace('.py', '')): f for f in subpages }
         
-        selected_subpage = st.sidebar.selectbox(
-            "Select Topic", 
-            options=list(page_names.keys()),
-            key="topic_selector"
-        )
+        selected_subpage = st.sidebar.selectbox("Select Topic", options=list(page_names.keys()))
 
-        # --- 6. CONTENT RENDERING WITH ERROR HANDLING ---
+        # --- 6. CONTENT RENDERING (FIXED) ---
         if selected_subpage:
-            st.write("") 
             file_to_load = os.path.join(block_path, page_names[selected_subpage])
             
             try:
-                # Dynamically execute the subpage
-                spec = importlib.util.spec_from_file_location("module.name", file_to_load)
+                spec = importlib.util.spec_from_file_location("dynamic_module", file_to_load)
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
-            
-            except ModuleNotFoundError as e:
-                st.error(f"### ⚠️ Missing Library")
-                st.info(f"The page you are trying to view requires a library that isn't installed: **{e.name}**")
-                st.markdown("""
-                **How to fix:**
-                1. Add `{}` to your `requirements.txt` file in GitHub.
-                2. Wait a moment for Streamlit to reboot.
-                """.format(e.name))
+                
+                # CRITICAL FIX: Explicitly call the show() function
+                if hasattr(module, "show"):
+                    module.show()
+                else:
+                    st.error("This module does not have a show() function.")
             
             except Exception as e:
                 st.error(f"### ❌ Page Error")
                 st.exception(e)
     else:
-        st.info("This category folder is currently empty.")
+        st.info("This category is empty.")
 
 if __name__ == "__main__":
     main()
