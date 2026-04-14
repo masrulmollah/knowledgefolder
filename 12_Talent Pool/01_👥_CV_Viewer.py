@@ -25,7 +25,6 @@ st.title("Talent Pool Viewer")
 st.markdown("Browse and download candidate CVs by department and experience level.")
 
 # --- DIRECTORY SETTINGS ---
-# This looks inside the current '02_👥_Talent_Pool' folder
 base_path = os.path.dirname(__file__) 
 
 def display_pdf(file_path):
@@ -35,25 +34,27 @@ def display_pdf(file_path):
     pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="1000" type="application/pdf"></iframe>'
     st.markdown(pdf_display, unsafe_allow_html=True)
 
-# --- NAVIGATION LOGIC ---
+# --- SIDEBAR NAVIGATION ---
+st.sidebar.header("Filter Candidates")
+
+# Get Departments
 departments = sorted([d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))])
 
 if not departments:
-    st.warning("No department folders found. Please create folders like 'Finance' or 'Engineer'.")
+    st.sidebar.warning("No department folders found.")
+    st.warning("Please create folders like 'Finance' or 'Engineer' in the directory.")
 else:
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        selected_dept = st.selectbox("Select Department", departments)
+    # Department Selection in Sidebar
+    selected_dept = st.sidebar.selectbox("Select Department", departments)
     
     dept_path = os.path.join(base_path, selected_dept)
     exp_levels = sorted([d for d in os.listdir(dept_path) if os.path.isdir(os.path.join(dept_path, d))])
     
     if not exp_levels:
-        st.info(f"No experience subfolders found in {selected_dept}.")
+        st.sidebar.info(f"No experience levels in {selected_dept}.")
     else:
-        with col2:
-            selected_exp = st.selectbox("Years of Experience", exp_levels)
+        # Experience Level Selection in Sidebar
+        selected_exp = st.sidebar.selectbox("Years of Experience", exp_levels)
         
         final_path = os.path.join(dept_path, selected_exp)
         cv_files = sorted([f for f in os.listdir(final_path) if f.lower().endswith('.pdf')])
@@ -61,10 +62,13 @@ else:
         if not cv_files:
             st.error(f"No PDF CVs found in {selected_dept} > {selected_exp}")
         else:
-            st.divider()
-            selected_cv = st.selectbox("Select Candidate CV", cv_files)
+            # Candidate Selection in Sidebar
+            selected_cv = st.sidebar.selectbox("Select Candidate CV", cv_files)
             cv_full_path = os.path.join(final_path, selected_cv)
 
+            # --- MAIN CONTENT AREA ---
+            st.divider()
+            
             # --- DOWNLOAD OPTION ---
             with open(cv_full_path, "rb") as pdf_file:
                 PDFbyte = pdf_file.read()
@@ -85,4 +89,4 @@ else:
 
 # --- FOOTER ---
 st.sidebar.divider()
-st.sidebar.info("Select a department and experience level to filter the talent pool.")
+st.sidebar.info("Use the dropdowns above to filter the talent pool.")
