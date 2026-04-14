@@ -18,6 +18,12 @@ st.markdown("""
         margin-bottom: 20px;
         border: 1px solid #d1d5db;
     }
+    .preview-box {
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 10px;
+        background-color: #f9f9f9;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -28,11 +34,29 @@ st.markdown("Browse and download candidate CVs by department and experience leve
 base_path = os.path.dirname(__file__) 
 
 def display_pdf(file_path):
-    """Helper function to embed PDF in Streamlit"""
-    with open(file_path, "rb") as f:
-        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="1000" type="application/pdf"></iframe>'
-    st.markdown(pdf_display, unsafe_allow_html=True)
+    """
+    Renders the PDF CV. 
+    Uses st.pdf for native viewing or a base64 fallback for published environments.
+    """
+    try:
+        with open(file_path, "rb") as f:
+            pdf_bytes = f.read()
+        
+        # Try the high-quality native viewer first
+        if hasattr(st, "pdf"):
+            try:
+                st.pdf(pdf_bytes, height=1000)
+                return
+            except Exception:
+                pass # Fallback to HTML if streamlit[pdf] is missing
+        
+        # Fallback for published environments or older versions
+        base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
+        pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="100%" height="1000" type="application/pdf">'
+        st.markdown(f'<div class="preview-box">{pdf_display}</div>', unsafe_allow_html=True)
+    
+    except Exception as e:
+        st.error(f"Error loading PDF: {e}")
 
 # --- SIDEBAR NAVIGATION ---
 st.sidebar.header("Filter Candidates")
@@ -79,7 +103,7 @@ else:
                 label="Click here to Download CV",
                 data=PDFbyte,
                 file_name=selected_cv,
-                mime='application/octet-stream',
+                mime='application/pdf',
             )
             st.markdown('</div>', unsafe_allow_html=True)
             
