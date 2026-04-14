@@ -15,41 +15,57 @@ st.markdown("""
         box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
         margin-bottom: 25px;
     }
+    /* Helps ensure the PDF embed takes up the full width */
+    embed {
+        border-radius: 8px;
+        box-shadow: 0px 2px 10px rgba(0,0,0,0.2);
+    }
     </style>
     """, unsafe_allow_html=True)
 
 st.title("Knowledge Repository: Books")
 st.markdown("Access technical manuals. *Preview limited to the cover page.*")
 
+# This looks inside the current folder
 base_path = os.path.dirname(__file__) 
 
 def get_preview_pdf(file_path):
     """Slices the PDF to only the first page for the viewer"""
-    reader = PdfReader(file_path)
-    writer = PdfWriter()
-    
-    if len(reader.pages) > 0:
-        writer.add_page(reader.pages[0])
-    
-    preview_buffer = io.BytesIO()
-    writer.write(preview_buffer)
-    return preview_buffer.getvalue()
+    try:
+        reader = PdfReader(file_path)
+        writer = PdfWriter()
+        
+        if len(reader.pages) > 0:
+            writer.add_page(reader.pages[0])
+        
+        preview_buffer = io.BytesIO()
+        writer.write(preview_buffer)
+        return preview_buffer.getvalue()
+    except Exception as e:
+        st.error(f"Error processing PDF: {e}")
+        return None
 
 def display_pdf(pdf_bytes):
-    """Embeds the provided PDF bytes into the iframe"""
+    """
+    Embeds the provided PDF bytes using an <embed> tag.
+    This is generally more compatible with Chrome's security settings than <iframe>.
+    """
     base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
-    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="700" type="application/pdf"></iframe>'
+    # Using <embed> instead of <iframe> to resolve "Blocked by Chrome" errors
+    pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="100%" height="800" type="application/pdf">'
     st.markdown(pdf_display, unsafe_allow_html=True)
 
 # --- SIDEBAR NAVIGATION ---
-st.sidebar.header("Library Navigation")
+st.sidebar.header("📚 Library Navigation")
 
+# Get list of Genre folders
 genres = sorted([d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))])
 
 if not genres:
     st.sidebar.warning("No genre folders found.")
+    st.info("Please create folders (e.g., 'Economics', 'Finance') in the app directory.")
 else:
-    # Moved Genre Selection to Sidebar
+    # 1. Select Genre
     selected_genre = st.sidebar.selectbox("Select Genre", genres)
     
     genre_path = os.path.join(base_path, selected_genre)
@@ -58,7 +74,7 @@ else:
     if not categories:
         st.sidebar.info(f"No categories found in {selected_genre}.")
     else:
-        # Moved Category Selection to Sidebar
+        # 2. Select Category
         selected_cat = st.sidebar.selectbox("Select Category", categories)
         
         final_path = os.path.join(genre_path, selected_cat)
@@ -67,7 +83,7 @@ else:
         if not book_files:
             st.sidebar.error(f"No PDF books found in {selected_cat}")
         else:
-            # Moved Book Title Selection to Sidebar
+            # 3. Select Book
             selected_book = st.sidebar.selectbox("Select Book Title", book_files)
             book_full_path = os.path.join(final_path, selected_book)
 
@@ -75,6 +91,7 @@ else:
             st.divider()
             st.markdown('<div class="book-container">', unsafe_allow_html=True)
             
+            # Read full file for download button
             with open(book_full_path, "rb") as pdf_file:
                 full_book_bytes = pdf_file.read()
 
@@ -91,11 +108,12 @@ else:
                 )
             st.markdown('</div>', unsafe_allow_html=True)
             
-            # Preview (1 page only)
+            # Generate and Display PREVIEW (1 page only)
             with st.expander("View Preview (Cover Page)", expanded=True):
                 preview_bytes = get_preview_pdf(book_full_path)
-                display_pdf(preview_bytes)
+                if preview_bytes:
+                    display_pdf(preview_bytes)
 
 # --- SIDEBAR FOOTER ---
 st.sidebar.divider()
-st.sidebar.info("Select a genre and category to browse the repository.")
+st.sidebar.info("Use the filters above to browse the technical library.")
