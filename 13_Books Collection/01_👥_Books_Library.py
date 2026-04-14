@@ -16,10 +16,10 @@ st.markdown("""
         margin-bottom: 25px;
     }
     .preview-box {
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        padding: 5px;
-        background-color: #fff;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 10px;
+        background-color: #f9f9f9;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -27,6 +27,7 @@ st.markdown("""
 st.title("Knowledge Repository: Books")
 st.markdown("Access technical manuals. *Preview limited to the cover page.*")
 
+# Directory setup
 base_path = os.path.dirname(__file__) 
 
 def get_preview_pdf_bytes(file_path):
@@ -45,31 +46,36 @@ def get_preview_pdf_bytes(file_path):
         return None
 
 def display_pdf_fallback(pdf_bytes):
-    """Fallback method using Base64 Embed for older Streamlit versions"""
+    """HTML Embed fallback for environments without streamlit[pdf]"""
     base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
-    # Using <embed> which is generally more compatible than <iframe>
     pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="100%" height="800" type="application/pdf">'
     st.markdown(f'<div class="preview-box">{pdf_display}</div>', unsafe_allow_html=True)
 
 # --- SIDEBAR NAVIGATION ---
 st.sidebar.header("📚 Library Navigation")
 
+# Scan for genre folders
 genres = sorted([d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))])
 
 if not genres:
-    st.sidebar.warning("No genre folders found.")
+    st.sidebar.warning("No folders found. Check your directory structure.")
 else:
     selected_genre = st.sidebar.selectbox("Select Genre", genres)
     
     genre_path = os.path.join(base_path, selected_genre)
     categories = sorted([d for d in os.listdir(genre_path) if os.path.isdir(os.path.join(genre_path, d))])
     
-    if categories:
+    if not categories:
+        st.sidebar.info(f"No categories in {selected_genre}.")
+    else:
         selected_cat = st.sidebar.selectbox("Select Category", categories)
+        
         final_path = os.path.join(genre_path, selected_cat)
         book_files = sorted([f for f in os.listdir(final_path) if f.lower().endswith('.pdf')])
         
-        if book_files:
+        if not book_files:
+            st.sidebar.error(f"No PDFs found in {selected_cat}")
+        else:
             selected_book = st.sidebar.selectbox("Select Book Title", book_files)
             book_full_path = os.path.join(final_path, selected_book)
 
@@ -97,13 +103,13 @@ else:
             with st.expander("View Preview (Cover Page)", expanded=True):
                 preview_data = get_preview_pdf_bytes(book_full_path)
                 if preview_data:
-                    # Check if current version supports st.pdf
-                    if hasattr(st, "pdf"):
+                    try:
+                        # Attempt to use the native high-quality viewer
                         st.pdf(preview_data, height=800)
-                    else:
-                        # Use the fallback method for older versions
+                    except Exception:
+                        # Fallback to base64 if streamlit[pdf] is missing/fails
                         display_pdf_fallback(preview_data)
 
 # --- SIDEBAR FOOTER ---
 st.sidebar.divider()
-st.sidebar.info("Select a genre and category to browse.")
+st.sidebar.info("Select a genre and category to browse the repository.")
