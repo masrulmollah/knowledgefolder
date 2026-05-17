@@ -10,3 +10,4 @@ streamlit>=1.31.0
 PyPDF2>=3.0.0
 streamlit[pdf]
 matplotlib
+seaborn
