@@ -17,8 +17,8 @@ set_page_config() is still only allowed in the homepage.
 
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
-import plotly.express as px
 
 
 # ── colour palette (matches a professional finance feel) ──────────────────────
@@ -291,14 +291,14 @@ def _section_types_of_ml():
         with c2:
             fig = go.Figure(go.Indicator(
                 mode="gauge+number", value=72,
-                title={"text": "Sample Credit Score", "font": {"size": 14}},
+                title={"text": "Sample Credit Score Probability", "font": {"size": 14}},
                 gauge={
-                    "axis": {"range": [300, 900]},
+                    "axis": {"range": [0, 100]},
                     "bar": {"color": PRIMARY},
                     "steps": [
-                        {"range": [300, 580], "color": "#FEE2E2"},
-                        {"range": [580, 720], "color": "#FEF3C7"},
-                        {"range": [720, 900], "color": "#D1FAE5"},
+                        {"range": [0, 40], "color": "#D1FAE5"},
+                        {"range": [40, 70], "color": "#FEF3C7"},
+                        {"range": [70, 100], "color": "#FEE2E2"},
                     ],
                 },
                 number={"suffix": "%", "font": {"size": 24}},
@@ -324,17 +324,15 @@ def _section_types_of_ml():
             - 🗺️ Mapping related accounts automatically
             """)
         with c2:
-            # simple scatter simulating clusters
-            import numpy as np
             np.random.seed(42)
             x1, y1 = np.random.normal(2, .5, 30), np.random.normal(3, .5, 30)
             x2, y2 = np.random.normal(5, .5, 30), np.random.normal(1.5, .4, 30)
             x3, y3 = np.random.normal(4, .4, 20), np.random.normal(5, .4, 20)
             fig2 = go.Figure()
             for x, y, name, color in [
-                (x1, y1, "High-value clients", PRIMARY),
-                (x2, y2, "SME clients",        SUCCESS),
-                (x3, y3, "At-risk clients",    WARNING),
+                (x1, y1, "High-value", PRIMARY),
+                (x2, y2, "SME clients",  SUCCESS),
+                (x3, y3, "At-risk",    WARNING),
             ]:
                 fig2.add_trace(go.Scatter(
                     x=x, y=y, mode="markers", name=name,
@@ -455,8 +453,9 @@ def _section_finance_applications():
                 return v
         return ""
 
+    # FIXED: Replaced deprecated .applymap() with .map() for modern Pandas compatibility
     st.dataframe(
-        df.style.applymap(colour_type, subset=["ML Type"])
+        df.style.map(colour_type, subset=["ML Type"])
           .set_table_styles([{
               "selector": "th",
               "props": [("background-color", "#4F46E5"), ("color", "white"),
@@ -548,6 +547,8 @@ def _knowledge_check():
     for i, q in enumerate(questions):
         st.markdown(f"""<div class="quiz-box">
           <div class="quiz-q">{q['q']}</div>""", unsafe_allow_html=True)
+        
+        # Set index=None safely
         choice = st.radio("Select your answer:", q["opts"],
                           key=f"mod1_q{i}", index=None, label_visibility="collapsed")
         if choice:
