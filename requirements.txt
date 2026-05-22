@@ -12,3 +12,4 @@ streamlit[pdf]
 matplotlib
 seaborn
 statsmodels
+numpy-financial
