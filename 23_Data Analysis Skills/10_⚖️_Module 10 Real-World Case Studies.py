@@ -329,8 +329,12 @@ and what corrective action is needed?
                                   line=dict(color="#1D9E75",width=2.5)))
         fig2.add_trace(go.Scatter(x=months[9:], y=forecast_c[9:], name="Forecast (updated)",
                                   line=dict(color="#BA7517",width=2,dash="dot")))
-        fig2.add_vline(x="M10", line_dash="dash", line_color="gray",
-                       annotation_text="Today (Day 100)")
+        fig2.add_shape(type="line", x0="M10", x1="M10", y0=0, y1=1,
+                       xref="x", yref="paper",
+                       line=dict(dash="dash", color="gray"))
+        fig2.add_annotation(x="M10", y=1.02, xref="x", yref="paper",
+                            text="Today (Day 100)", showarrow=False,
+                            font=dict(color="gray"), align="center")
         fig2.update_layout(title="Year 1 Synergy Delivery — Actual vs Target (Cumulative $M)",
                            xaxis_title="Month", yaxis_title="Cumulative Synergies ($M)",
                            template="plotly_white", height=400,
