@@ -46,6 +46,13 @@ BUCKETS = {
             "Corporate Finance & Treasury": "🏦",
         },
     },
+    "🧩 Applied Knowledge": {
+        "light": "#FCEFF3",
+        "accent": "#C2185B",
+        "topics": {
+            "Applied Accounting Standards": "📐",
+        },
+    },
     "💻 Digital Skills": {
         "light": "#EAF3FA",
         "accent": "#0EA5E9",
@@ -193,6 +200,32 @@ div[data-testid="stMain"] div[data-testid="stButton"] > button:focus {
     outline: none !important;
 }
 
+/* ── Placeholder card (no folder yet) — same size as real cards ── */
+.topic-card-placeholder {
+    width: 100%;
+    height: 110px;
+    min-height: 110px;
+    max-height: 110px;
+    background: repeating-linear-gradient(135deg, #FAFAFA, #FAFAFA 10px, #F3F3F3 10px, #F3F3F3 20px);
+    border: 1.5px dashed #D0D5DD;
+    border-radius: 12px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+    opacity: 0.85;
+    cursor: not-allowed;
+}
+.ph-icon  { font-size: 22px; filter: grayscale(60%); opacity: 0.7; }
+.ph-label { font-size: 12px; font-weight: 600; color: #6b7280; line-height: 1.3; }
+.ph-tag   {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
+    color: #9aa3b2; background: #ECEEF1; padding: 2px 8px; border-radius: 8px; margin-top: 2px;
+}
+
 /* ── Topic page header ── */
 .topic-header {
     display:flex; align-items:center; gap:12px;
@@ -248,12 +281,29 @@ def show_homepage(bucket_topics: dict):
     all_buckets = list(BUCKETS.items())
 
     for bucket_name, meta in all_buckets:
-        topics = sorted(bucket_topics.get(bucket_name, []))
-        if not topics:
-            continue
-
         accent = meta["accent"]
         light  = meta["light"]
+
+        # Topics that DO have a matching folder on disk
+        found_topics = {label: (icon, folder_name) for label, icon, folder_name in bucket_topics.get(bucket_name, [])}
+
+        # Build the full display list: every topic defined in BUCKETS for this
+        # section, using the real folder if found, else a placeholder.
+        display_topics = []
+        for topic_name, default_icon in meta["topics"].items():
+            # Try exact match first, then a loose contains-match against found folders
+            match = None
+            if topic_name in found_topics:
+                match = found_topics[topic_name]
+            else:
+                for flabel, (ficon, ffolder) in found_topics.items():
+                    if topic_name.lower() in flabel.lower() or flabel.lower() in topic_name.lower():
+                        match = (ficon, ffolder)
+                        break
+            if match:
+                display_topics.append((topic_name, match[0], match[1]))
+            else:
+                display_topics.append((topic_name, default_icon, None))  # None = not yet created
 
         st.markdown(f"""
         <div class="section-label" style="border-color:{accent};">
@@ -261,23 +311,33 @@ def show_homepage(bucket_topics: dict):
         </div>
         """, unsafe_allow_html=True)
 
-        cols = st.columns(min(len(topics), 8))
-        for i, (label, icon, folder_name) in enumerate(topics):
+        cols = st.columns(min(len(display_topics), 8))
+        for i, (label, icon, folder_name) in enumerate(display_topics):
             with cols[i]:
-                # Single button styled as a card — no duplicate HTML element
-                if st.button(
-                    f"{icon}\n\n{label}",
-                    key=f"nav_{bucket_name}_{label}",
-                    use_container_width=True,
-                    help=f"Open {label}"
-                ):
-                    st.session_state.view          = "topic"
-                    st.session_state.active_label  = label
-                    st.session_state.active_folder = folder_name
-                    st.session_state.active_icon   = icon
-                    st.session_state.active_accent = accent
-                    st.session_state.active_light  = light
-                    st.rerun()
+                if folder_name is not None:
+                    # Single button styled as a card — no duplicate HTML element
+                    if st.button(
+                        f"{icon}\n\n{label}",
+                        key=f"nav_{bucket_name}_{label}",
+                        use_container_width=True,
+                        help=f"Open {label}"
+                    ):
+                        st.session_state.view          = "topic"
+                        st.session_state.active_label  = label
+                        st.session_state.active_folder = folder_name
+                        st.session_state.active_icon   = icon
+                        st.session_state.active_accent = accent
+                        st.session_state.active_light  = light
+                        st.rerun()
+                else:
+                    # Placeholder card for topics with no matching folder yet
+                    st.markdown(f"""
+                    <div class="topic-card-placeholder" title="Folder not created yet">
+                        <div class="ph-icon">{icon}</div>
+                        <div class="ph-label">{label}</div>
+                        <div class="ph-tag">Coming soon</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
         st.markdown("<div style='margin-bottom:4px'></div>", unsafe_allow_html=True)
 
