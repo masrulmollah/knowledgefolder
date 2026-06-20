@@ -51,6 +51,7 @@ BUCKETS = {
         "accent": "#C2185B",
         "topics": {
             "Applied Accounting Standards": "📐",
+	    
         },
     },
     "💻 Digital Skills": {
@@ -77,6 +78,7 @@ BUCKETS = {
         "topics": {
             "My Calculations":        "🧮",
             "Translating Complexity": "🗺️",
+	    "Financial Statements": "📖",
         },
     },
     "🧭 Corporate Strategy & Leadership": {
