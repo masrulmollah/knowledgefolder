@@ -13,6 +13,18 @@ st.set_page_config(
 # BUCKET + TOPIC ICON DEFINITIONS
 # ---------------------------------------------------------------------------
 BUCKETS = {
+    "🏛️ Home": {
+        "light": "#EEF2FA",
+        "accent": "#2F5FC4",
+        "topics": {
+            "Introduction":       "🫥",
+            "Objective":              "🎯",
+            "Team":      "👷",
+            "Contract":      "🏛️",
+            "Others":        "👷",
+        },
+    },
+
     "⚖️ Legal Aspects": {
         "light": "#EEF2FA",
         "accent": "#2F5FC4",
@@ -79,6 +91,8 @@ BUCKETS = {
             "My Calculations":        "🧮",
             "Translating Complexity": "🗺️",
 	    "Financial Statements": "📖",
+	    "Tax Returns": "📝",
+
         },
     },
     "🧭 Corporate Strategy & Leadership": {
