@@ -186,7 +186,7 @@ def _section_text_classification():
     ]
     df = pd.DataFrame(invoice_data, columns=["Invoice Description","GL Category","GL Code","Confidence"])
     st.dataframe(
-        df.style.applymap(
+        df.style.map(
             lambda v: "background-color:#D1FAE5;color:#065F46" if "✅" in str(v)
             else "background-color:#FEF3C7;color:#92400E" if "⚠️" in str(v) else "",
             subset=["Confidence"]
