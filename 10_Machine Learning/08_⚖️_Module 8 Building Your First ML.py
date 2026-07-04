@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
+from sklearn.preprocessing import LabelEncoder
 
 PRIMARY="#1E3A5F"; SECONDARY="#3B82F6"; SUCCESS="#10B981"; WARNING="#F59E0B"; DANGER="#EF4444"
 
