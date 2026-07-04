@@ -20,8 +20,8 @@ BUCKETS = {
             "Introduction":       "🫥",
             "Objective":              "🎯",
             "Team":      "👷",
-            "Contract":      "🏛️",
-            "Others":        "👷",
+            "Content":      "🏛️",
+            "Contact":        "👷",
         },
     },
 
