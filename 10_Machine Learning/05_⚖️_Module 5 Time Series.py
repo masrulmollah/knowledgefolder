@@ -85,7 +85,7 @@ def _section_intro():
 
     st.markdown("#### 📉 Decomposition of a retail revenue time series")
     np.random.seed(7)
-    months = pd.date_range("2021-01-01", periods=48, freq="M")
+    months = pd.date_range("2021-01-01", periods=48, freq="ME")
     trend = np.linspace(100, 145, 48)
     seasonality = 15 * np.sin(2 * np.pi * np.arange(48) / 12 - np.pi/2)
     noise = np.random.randn(48) * 3
@@ -109,7 +109,7 @@ def _section_moving_average():
     st.markdown("The simplest forecasting technique — average the last N periods. Used heavily in finance for trend identification and budget smoothing.")
 
     np.random.seed(42)
-    months = pd.date_range("2022-01-01", periods=36, freq="M")
+    months = pd.date_range("2022-01-01", periods=36, freq="ME")
     actual = 80 + np.cumsum(np.random.randn(36)*2 + 0.8) + 12*np.sin(np.linspace(0,6,36))
 
     window = st.slider("Moving average window (months)", 2, 12, 3)
@@ -143,8 +143,8 @@ def _section_arima():
     """)
 
     np.random.seed(15)
-    history_months = pd.date_range("2021-01-01", periods=36, freq="M")
-    forecast_months = pd.date_range("2024-01-01", periods=12, freq="M")
+    history_months = pd.date_range("2021-01-01", periods=36, freq="ME")
+    forecast_months = pd.date_range("2024-01-01", periods=12, freq="ME")
     history = 100 + np.cumsum(np.random.randn(36)*2.5 + 1.2) + 10*np.sin(np.linspace(0,6,36))
     last = history[-1]
     forecast = last + np.cumsum(np.random.randn(12)*2 + 1.0) + 8*np.sin(np.linspace(0,2,12))
@@ -231,7 +231,7 @@ def _section_interactive_forecast():
         capex_monthly = st.number_input("Monthly capex ($K)", 0, 500, 50, 10)
         tax_rate = st.slider("Tax rate (%)", 0, 40, 25)
 
-    months = pd.date_range("2025-01-01", periods=12, freq="M")
+    months = pd.date_range("2025-01-01", periods=12, freq="ME")
     month_nums = np.arange(12)
     revenue = base_revenue * (1 + growth_rate/100) ** month_nums
     seasonal = seasonality_amp * np.sin(2*np.pi*month_nums/12 - np.pi/2)
