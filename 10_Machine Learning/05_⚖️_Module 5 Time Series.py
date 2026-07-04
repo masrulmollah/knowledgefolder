@@ -11,7 +11,7 @@ import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 
-PRIMARY="#B45309"; SECONDARY="#F59E0B"; SUCCESS="#10B981"; DANGER="#EF4444"; ACCENT="#6366F1"
+PRIMARY="#B45309"; SECONDARY="#F59E0B"; SUCCESS="#10B981"; DANGER="#EF4444"; ACCENT="#6366F1"; WARNING="#F97316"
 
 
 def _css():
