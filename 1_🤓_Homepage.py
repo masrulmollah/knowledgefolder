@@ -63,6 +63,7 @@ BUCKETS = {
         "accent": "#C2185B",
         "topics": {
             "Applied Accounting Standards": "📐",
+            "Applied Machine Learning": "🖥️",
 	    
         },
     },
