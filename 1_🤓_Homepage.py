@@ -64,6 +64,7 @@ BUCKETS = {
         "topics": {
             "Applied Accounting Standards": "📐",
             "Applied Machine Learning": "🖥️",
+            "Applied Data Visualization": "📈",
 	    
         },
     },
