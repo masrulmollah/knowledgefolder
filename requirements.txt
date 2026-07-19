@@ -13,3 +13,4 @@ matplotlib>=3.8
 plotly>=5.20
 statsmodels>=0.14
 xgboost>=2.0
+numpy-financial
