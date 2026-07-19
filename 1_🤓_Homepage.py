@@ -94,7 +94,7 @@ BUCKETS = {
             "Translating Complexity": "🗺️",
 	    "Financial Statements": "📖",
 	    "Tax Returns": "📝",
-
+	    "Analytics Exercise": "📈",
         },
     },
     "🧭 Corporate Strategy & Leadership": {
