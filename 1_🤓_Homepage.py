@@ -66,6 +66,7 @@ BUCKETS = {
             "Applied Machine Learning": "🖥️",
             "Applied Data Visualization": "📈",
             "Applied Data Analytics": "🔎",	    
+            "Applied Financial Models": "🔎",	    
         },
     },
     "💻 Digital Skills": {
