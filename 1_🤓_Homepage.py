@@ -66,9 +66,18 @@ BUCKETS = {
             "Applied Machine Learning": "🖥️",
             "Applied Data Visualization": "📈",
             "Applied Data Analytics": "🔎",	    
-            "Applied Financial Models": "🔎",	    
+            "Applied Financial Models": "🧮",	    
         },
     },
+    "👔 Executive Sandbox": {
+        "light": "#FCEFF3",
+        "accent": "#C2185B",
+        "topics": {
+            "Business Case": "💰",
+            "Performance Management": "⭐",
+        },
+    },
+
     "💻 Digital Skills": {
         "light": "#EAF3FA",
         "accent": "#0EA5E9",
