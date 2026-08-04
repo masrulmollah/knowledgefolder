@@ -76,6 +76,7 @@ BUCKETS = {
             "Business Case": "💰",
             "Business Case Part 2": "💰",
             "Performance Management": "⭐",
+            "Performance Management Part 2": "⭐",
         },
     },
 
