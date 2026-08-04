@@ -74,6 +74,7 @@ BUCKETS = {
         "accent": "#C2185B",
         "topics": {
             "Business Case": "💰",
+            "Business Case Part 2": "💰",
             "Performance Management": "⭐",
         },
     },
