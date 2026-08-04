@@ -117,7 +117,6 @@ BUCKETS = {
             "Economics":         "🌐",
             "Leadership":        "🧭",
             "Business Strategy": "♟️",
-            "Home":              "🏠",
         },
     },
 }
